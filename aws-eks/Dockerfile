@@ -1,11 +1,14 @@
-FROM hashicorp/terraform:light
+FROM alpine:3.16
 
 # Ignore to update versions here
 # docker build --no-cache --build-arg KUBECTL_VERSION=${tag} --build-arg HELM_VERSION=${helm} --build-arg KUSTOMIZE_VERSION=${kustomize_version} -t ${image}:${tag} .
-ARG HELM_VERSION=3.2.1
-ARG KUBECTL_VERSION=1.17.5
-ARG KUSTOMIZE_VERSION=v3.8.1
-ARG KUBESEAL_VERSION=0.18.1
+ARG HELM_VERSION
+ARG KUBECTL_VERSION
+ARG TERRAFORM_VERSION
+ARG KUSTOMIZE_VERSION
+ARG KUBESEAL_VERSION
+ARG KUBERNETES_SIGS_VERSION
+ARG KUBESEAL_VERSION
 
 # Install helm (latest release)
 # ENV BASE_URL="https://storage.googleapis.com/kubernetes-helm"
@@ -27,18 +30,25 @@ RUN helm plugin install https://github.com/quintush/helm-unittest && rm -rf /tmp
 RUN helm plugin install https://github.com/chartmuseum/helm-push && rm -rf /tmp/helm-*
 
 # Install kubectl (same version of aws esk)
-RUN curl -sLO https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
+RUN curl -LO https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl  && \
     mv kubectl /usr/bin/kubectl && \
     chmod +x /usr/bin/kubectl
 
+# Install terrform
+RUN curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    mv terraform /usr/bin/terraform && \
+    chmod +x /usr/bin/terraform
+
 # Install kustomize (latest release)
-RUN curl -sLO https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz && \
-    tar xvzf kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz && \
+RUN curl -sLO https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz && \
+    tar xvzf kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz && \
     mv kustomize /usr/bin/kustomize && \
     chmod +x /usr/bin/kustomize
 
 # Install eksctl (latest version)
-RUN curl -sL "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \
+RUN curl -sL "https://github.com/weaveworks/eksctl/releases/download/v0.120.0/eksctl_Linux_amd64.tar.gz" | tar xz -C /tmp && \
     mv /tmp/eksctl /usr/bin && \
     chmod +x /usr/bin/eksctl
 
@@ -49,20 +59,19 @@ RUN apk add --update --no-cache python3 && \
     pip3 install awscli && \
     pip3 cache purge
 
-# Install jq
-RUN apk add --update --no-cache jq yq
-
 # https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
 # Install aws-iam-authenticator (latest version)
-RUN authenticator=$(curl -fs https://api.github.com/repos/kubernetes-sigs/aws-iam-authenticator/releases/latest | jq --raw-output '.name' | sed 's/^v//') && \
-    curl -fL https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v${authenticator}/aws-iam-authenticator_${authenticator}_linux_amd64 -o /usr/bin/aws-iam-authenticator && \
+RUN curl -fL https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v${KUBERNETES_SIGS_VERSION}/aws-iam-authenticator_${KUBERNETES_SIGS_VERSION} \
+    _linux_amd64 -o \
+    /usr/bin/aws-iam-authenticator && \
     chmod +x /usr/bin/aws-iam-authenticator
 
 # Install for envsubst
 RUN apk add --update --no-cache gettext
 
 # Install kubeseal
-RUN curl -L https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz -o - | tar xz -C /usr/bin/ && \
+RUN curl -L https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz \
+    -o - | tar xz -C /usr/bin/ && \
     chmod +x /usr/bin/kubeseal
 
 WORKDIR /apps

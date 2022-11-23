@@ -1,6 +1,6 @@
 # AWS cli EKS with Terraform  
 
-## Built With base on alpine 
+## Built With  
 
 * kubectl 1.24.4
 * Terraform 1.3.4

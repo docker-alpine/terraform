@@ -40,7 +40,7 @@ docker run terraformaws/eks:latest kubectl version --output=yaml
 
 ## Authors
 
-* **Dmitry Popov** - *Initial work* - [PurpleBooth](https://github.com/popov-do)
+* **Dmitry Popov** - *Initial work* - [popov-do](https://github.com/popov-do)
 
 ## License
 

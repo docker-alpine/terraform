@@ -61,8 +61,7 @@ RUN apk add --update --no-cache python3 && \
 
 # https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
 # Install aws-iam-authenticator (latest version)
-RUN curl -fL https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v${KUBERNETES_SIGS_VERSION}/aws-iam-authenticator_${KUBERNETES_SIGS_VERSION} \
-    _linux_amd64 -o \
+RUN curl -fL https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v${KUBERNETES_SIGS_VERSION}/aws-iam-authenticator_${KUBERNETES_SIGS_VERSION}_linux_amd64 -o \
     /usr/bin/aws-iam-authenticator && \
     chmod +x /usr/bin/aws-iam-authenticator
 

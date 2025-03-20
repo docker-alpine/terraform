@@ -31,13 +31,13 @@ jobs:
           context: ./aws-eks
           platforms: linux/amd64,linux/arm64
           build-args: |
-            KUBECTL_VERSION=1.24.4
-            TERRAFORM_VERSION=1.3.4
-            HELM_VERSION=3.10.2
-            KUSTOMIZE_VERSION=4.5.7
-            KUBESEAL_VERSION=0.19.1
-            KUBERNETES_SIGS_VERSION=0.5.9
+            KUBECTL_VERSION=1.32.2
+            TERRAFORM_VERSION=1.9.8
+            HELM_VERSION=3.17.0
+            KUSTOMIZE_VERSION=5.5.0
+            KUBESEAL_VERSION=0.28.0
+            KUBERNETES_SIGS_VERSION=0.6.30
           push: true
           tags: |
             terraformaws/eks:latest
-            terraformaws/eks:1.23
+            terraformaws/eks:1.32
